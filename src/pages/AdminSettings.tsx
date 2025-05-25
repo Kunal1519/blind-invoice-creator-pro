@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 interface CompanySettings {
   companyName: string;
   logo: string;
+  logoFile?: File;
   address: string;
   phone: string;
   email: string;
@@ -63,6 +64,21 @@ const AdminSettings = () => {
     setSettings(defaultSettings);
   };
 
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setSettings({ 
+          ...settings, 
+          logo: e.target?.result as string,
+          logoFile: file 
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
@@ -86,12 +102,23 @@ const AdminSettings = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="logo">Logo Text</Label>
-                <Input
-                  id="logo"
-                  value={settings.logo}
-                  onChange={(e) => setSettings({ ...settings, logo: e.target.value })}
-                />
+                <Label htmlFor="logo">Logo Text/Upload Logo</Label>
+                <div className="space-y-2">
+                  <Input
+                    id="logo"
+                    value={typeof settings.logo === 'string' && !settings.logo.startsWith('data:') ? settings.logo : ''}
+                    onChange={(e) => setSettings({ ...settings, logo: e.target.value })}
+                    placeholder="Logo text (e.g., SONAL)"
+                  />
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                  />
+                  {settings.logo && settings.logo.startsWith('data:') && (
+                    <img src={settings.logo} alt="Logo preview" className="w-16 h-16 object-contain border rounded" />
+                  )}
+                </div>
               </div>
             </div>
 
@@ -177,6 +204,29 @@ const AdminSettings = () => {
                   onChange={(e) => setSettings({ ...settings, branchName: e.target.value })}
                 />
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>About Vendors</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-semibold mb-2">Vendor Usage Clarification:</h4>
+              <p className="text-sm text-gray-700">
+                In a <strong>Proforma Invoice</strong> for blinds business, <strong>Vendors</strong> are typically your suppliers (fabric manufacturers, hardware suppliers, etc.). 
+                However, in the invoice itself, you represent yourself as the seller to your customers (Parties/Buyers).
+              </p>
+              <ul className="list-disc list-inside mt-2 text-sm text-gray-700">
+                <li><strong>Parties/Buyers:</strong> Your customers who are purchasing blinds</li>
+                <li><strong>Vendors:</strong> Used internally for cost calculation and inventory management</li>
+                <li><strong>Products:</strong> The blinds you sell, which may be sourced from vendors</li>
+              </ul>
+              <p className="text-sm text-gray-700 mt-2">
+                The vendor information helps you track costs and margins but doesn't appear on customer invoices.
+              </p>
             </div>
           </CardContent>
         </Card>
