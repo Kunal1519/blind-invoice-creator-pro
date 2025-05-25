@@ -74,7 +74,7 @@ const Dashboard = () => {
             <span className="text-blue-700 font-medium">Admin</span>
           </Link>
           <Link
-            to="/saved-invoice"
+            to="/saved-invoices"
             className="flex items-center justify-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
           >
             <span className="text-green-700 font-medium">Saved Invoices</span>
