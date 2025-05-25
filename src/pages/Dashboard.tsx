@@ -65,6 +65,20 @@ const Dashboard = () => {
             <span className="text-yellow-700 font-medium">Generate Invoice</span>
           </Link>
         </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link
+            to="/admin"
+            className="flex items-center justify-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+          >
+            <span className="text-blue-700 font-medium">Admin</span>
+          </Link>
+          <Link
+            to="/saved-invoice"
+            className="flex items-center justify-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+          >
+            <span className="text-green-700 font-medium">Saved Invoices</span>
+          </Link>
+        </div>
       </div>
     </div>
   );
