@@ -9,7 +9,9 @@ const Navigation = () => {
     { path: '/vendors', label: 'Vendors' },
     { path: '/parties', label: 'Parties' },
     { path: '/products', label: 'Products' },
-    { path: '/invoice', label: 'Generate Invoice' }
+    { path: '/invoice', label: 'Generate Invoice' },
+    { path: '/saved-invoices', label: 'Saved Invoices' },
+    { path: '/admin', label: 'Admin Settings' }
   ];
 
   return (

@@ -1,4 +1,3 @@
-
 import { useInvoice } from '../contexts/InvoiceContext';
 import { useMasterData } from '../contexts/MasterDataContext';
 import { Button } from '@/components/ui/button';
@@ -14,12 +13,20 @@ const InvoicePreview = () => {
   const selectedParty = parties.find(p => p.id === currentInvoice.partyId);
 
   const handlePrint = () => {
-    window.print();
+    const printContent = document.querySelector('.invoice-container');
+    const originalContent = document.body.innerHTML;
+    
+    if (printContent) {
+      document.body.innerHTML = printContent.outerHTML;
+      window.print();
+      document.body.innerHTML = originalContent;
+      window.location.reload();
+    }
   };
 
   return (
     <Card className="p-6 bg-white">
-      <div className="invoice-container">
+      <div className="invoice-container print:p-0">
         {/* Header */}
         <div className="text-center mb-6 border-2 border-black p-4">
           <div className="flex items-center justify-center mb-2">
@@ -47,7 +54,7 @@ const InvoicePreview = () => {
         </div>
 
         {/* Buyer Details */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
           <div className="border border-black">
             <div className="bg-blue-100 p-2 border-b border-black">
               <h3 className="font-bold text-blue-800">BUYER'S DETAILS</h3>
@@ -104,86 +111,88 @@ const InvoicePreview = () => {
           <p className="text-sm">कृपया चौड़ाई (width) और ऊंचाई (height) को सही से जांचे</p>
         </div>
 
-        {/* Items Table */}
-        <div className="border border-black mb-4">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="bg-yellow-200">
-                <th className="border border-black p-1">S. No.</th>
-                <th className="border border-black p-1">Description of Goods</th>
-                <th className="border border-black p-1">Shade Name</th>
-                <th className="border border-black p-1">Shade Color</th>
-                <th className="border border-black p-1">Operation of Chain Etc</th>
-                <th className="border border-black p-1">Qty</th>
-                <th className="border border-black p-1">SIZE IN INCH<br/>WIDTH(3) LENGTH</th>
-                <th className="border border-black p-1">Sq. Ft.</th>
-                <th className="border border-black p-1">Price per Sq.Ft.</th>
-                <th className="border border-black p-1">Amount</th>
-                <th className="border border-black p-1">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentInvoice.items.map((item, index) => (
-                <tr key={item.id}>
-                  <td className="border border-black p-1 text-center">{index + 1}</td>
-                  <td className="border border-black p-1">{item.productName}</td>
-                  <td className="border border-black p-1">{item.shade}</td>
-                  <td className="border border-black p-1">{item.shadeColor}</td>
-                  <td className="border border-black p-1">{item.operationType}</td>
-                  <td className="border border-black p-1 text-center">{item.quantity}</td>
-                  <td className="border border-black p-1 text-center">
-                    {item.unit === 'inches' 
-                      ? `${item.widthInches} x ${item.heightInches}` 
-                      : `${item.widthCm} x ${item.heightCm}`
-                    }
-                  </td>
-                  <td className="border border-black p-1 text-center">{item.sqFt}</td>
-                  <td className="border border-black p-1 text-center">{item.pricePerSqFt}</td>
-                  <td className="border border-black p-1 text-center">{item.amount.toFixed(2)}</td>
-                  <td className="border border-black p-1 text-center">
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => removeInvoiceItem(item.id)}
-                      className="text-xs h-6"
-                    >
-                      Remove
-                    </Button>
-                  </td>
+        {/* Items Table - Made responsive with horizontal scroll */}
+        <div className="border border-black mb-4 overflow-x-auto">
+          <div className="min-w-[1200px]">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-yellow-200">
+                  <th className="border border-black p-1 w-12">S. No.</th>
+                  <th className="border border-black p-1 min-w-[150px]">Description of Goods</th>
+                  <th className="border border-black p-1 min-w-[100px]">Shade Name</th>
+                  <th className="border border-black p-1 min-w-[100px]">Shade Color</th>
+                  <th className="border border-black p-1 min-w-[120px]">Operation of Chain Etc</th>
+                  <th className="border border-black p-1 w-16">Qty</th>
+                  <th className="border border-black p-1 min-w-[120px]">SIZE IN INCH<br/>WIDTH(3) LENGTH</th>
+                  <th className="border border-black p-1 w-20">Sq. Ft.</th>
+                  <th className="border border-black p-1 w-24">Price per Sq.Ft.</th>
+                  <th className="border border-black p-1 w-20">Amount</th>
+                  <th className="border border-black p-1 w-20 print:hidden">Action</th>
                 </tr>
-              ))}
-              {/* Empty rows */}
-              {Array.from({ length: Math.max(0, 4 - currentInvoice.items.length) }).map((_, index) => (
-                <tr key={`empty-${index}`}>
-                  <td className="border border-black p-1 h-8"></td>
+              </thead>
+              <tbody>
+                {currentInvoice.items.map((item, index) => (
+                  <tr key={item.id}>
+                    <td className="border border-black p-1 text-center">{index + 1}</td>
+                    <td className="border border-black p-1">{item.productName}</td>
+                    <td className="border border-black p-1">{item.shade}</td>
+                    <td className="border border-black p-1">{item.shadeColor}</td>
+                    <td className="border border-black p-1">{item.operationType}</td>
+                    <td className="border border-black p-1 text-center">{item.quantity}</td>
+                    <td className="border border-black p-1 text-center">
+                      {item.unit === 'inches' 
+                        ? `${item.widthInches} x ${item.heightInches}` 
+                        : `${item.widthCm} x ${item.heightCm}`
+                      }
+                    </td>
+                    <td className="border border-black p-1 text-center">{item.sqFt}</td>
+                    <td className="border border-black p-1 text-center">{item.pricePerSqFt}</td>
+                    <td className="border border-black p-1 text-center">{item.amount.toFixed(2)}</td>
+                    <td className="border border-black p-1 text-center print:hidden">
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => removeInvoiceItem(item.id)}
+                        className="text-xs h-6"
+                      >
+                        Remove
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+                {/* Empty rows */}
+                {Array.from({ length: Math.max(0, 4 - currentInvoice.items.length) }).map((_, index) => (
+                  <tr key={`empty-${index}`}>
+                    <td className="border border-black p-1 h-8"></td>
+                    <td className="border border-black p-1"></td>
+                    <td className="border border-black p-1"></td>
+                    <td className="border border-black p-1"></td>
+                    <td className="border border-black p-1"></td>
+                    <td className="border border-black p-1"></td>
+                    <td className="border border-black p-1"></td>
+                    <td className="border border-black p-1"></td>
+                    <td className="border border-black p-1"></td>
+                    <td className="border border-black p-1"></td>
+                    <td className="border border-black p-1 print:hidden"></td>
+                  </tr>
+                ))}
+                {/* Total Material Row */}
+                <tr className="bg-blue-100">
+                  <td className="border border-black p-1" colSpan={5}></td>
+                  <td className="border border-black p-1 text-center font-semibold">TOTAL MATERIAL -</td>
+                  <td className="border border-black p-1 text-center font-semibold">{currentInvoice.totalMaterial}</td>
+                  <td className="border border-black p-1 text-center font-semibold">{currentInvoice.totalSqFt}</td>
                   <td className="border border-black p-1"></td>
                   <td className="border border-black p-1"></td>
-                  <td className="border border-black p-1"></td>
-                  <td className="border border-black p-1"></td>
-                  <td className="border border-black p-1"></td>
-                  <td className="border border-black p-1"></td>
-                  <td className="border border-black p-1"></td>
-                  <td className="border border-black p-1"></td>
-                  <td className="border border-black p-1"></td>
-                  <td className="border border-black p-1"></td>
+                  <td className="border border-black p-1 print:hidden"></td>
                 </tr>
-              ))}
-              {/* Total Material Row */}
-              <tr className="bg-blue-100">
-                <td className="border border-black p-1" colSpan={5}></td>
-                <td className="border border-black p-1 text-center font-semibold">TOTAL MATERIAL -</td>
-                <td className="border border-black p-1 text-center font-semibold">{currentInvoice.totalMaterial}</td>
-                <td className="border border-black p-1 text-center font-semibold">{currentInvoice.totalSqFt}</td>
-                <td className="border border-black p-1"></td>
-                <td className="border border-black p-1"></td>
-                <td className="border border-black p-1"></td>
-              </tr>
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Payment Details */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="border border-black">
             <div className="bg-yellow-200 p-2 border-b border-black">
               <h3 className="font-semibold">Payment Should Be Payable To :-</h3>
@@ -330,12 +339,12 @@ const InvoicePreview = () => {
             </div>
           </div>
         </div>
-
-        <div className="mt-6 flex justify-center">
-          <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700">
-            Print Invoice
-          </Button>
-        </div>
+      </div>
+      
+      <div className="mt-6 flex justify-center print:hidden">
+        <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700">
+          Print Invoice
+        </Button>
       </div>
     </Card>
   );

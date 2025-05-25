@@ -41,22 +41,34 @@ export interface Invoice {
   gstAmount: number;
   grandTotal: number;
   totalPayment: number;
+  status: 'draft' | 'saved' | 'sent';
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface InvoiceContextType {
   currentInvoice: Invoice | null;
+  savedInvoices: Invoice[];
   createNewInvoice: () => void;
   updateInvoice: (invoice: Partial<Invoice>) => void;
   addInvoiceItem: (item: Omit<InvoiceItem, 'id' | 'sqFt' | 'amount'>) => void;
   updateInvoiceItem: (id: string, item: Partial<InvoiceItem>) => void;
   removeInvoiceItem: (id: string) => void;
   calculateTotals: () => void;
+  saveInvoice: () => void;
+  loadInvoice: (id: string) => void;
+  deleteInvoice: (id: string) => void;
+  getSavedInvoices: () => Invoice[];
 }
 
 const InvoiceContext = createContext<InvoiceContextType | undefined>(undefined);
 
 export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentInvoice, setCurrentInvoice] = useState<Invoice | null>(null);
+  const [savedInvoices, setSavedInvoices] = useState<Invoice[]>(() => {
+    const saved = localStorage.getItem('savedInvoices');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const calculateSqFt = (width: number, height: number, unit: 'inches' | 'cm'): number => {
     if (unit === 'inches') {
@@ -88,14 +100,22 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       gstPercentage: 18,
       gstAmount: 0,
       grandTotal: 0,
-      totalPayment: 0
+      totalPayment: 0,
+      status: 'draft',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     setCurrentInvoice(newInvoice);
   };
 
   const updateInvoice = (invoice: Partial<Invoice>) => {
     if (currentInvoice) {
-      setCurrentInvoice({ ...currentInvoice, ...invoice });
+      const updatedInvoice = { 
+        ...currentInvoice, 
+        ...invoice, 
+        updatedAt: new Date().toISOString() 
+      };
+      setCurrentInvoice(updatedInvoice);
     }
   };
 
@@ -115,7 +135,8 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       setCurrentInvoice({
         ...currentInvoice,
-        items: [...currentInvoice.items, newItem]
+        items: [...currentInvoice.items, newItem],
+        updatedAt: new Date().toISOString()
       });
     }
   };
@@ -141,7 +162,8 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       setCurrentInvoice({
         ...currentInvoice,
-        items: updatedItems
+        items: updatedItems,
+        updatedAt: new Date().toISOString()
       });
     }
   };
@@ -150,7 +172,8 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (currentInvoice) {
       setCurrentInvoice({
         ...currentInvoice,
-        items: currentInvoice.items.filter(item => item.id !== id)
+        items: currentInvoice.items.filter(item => item.id !== id),
+        updatedAt: new Date().toISOString()
       });
     }
   };
@@ -179,20 +202,63 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         totalAmountBeforeTax: parseFloat(totalAmountBeforeTax.toFixed(2)),
         gstAmount: parseFloat(gstAmount.toFixed(2)),
         grandTotal: parseFloat(grandTotal.toFixed(2)),
-        totalPayment: parseFloat(grandTotal.toFixed(2))
+        totalPayment: parseFloat(grandTotal.toFixed(2)),
+        updatedAt: new Date().toISOString()
       });
     }
   };
 
+  const saveInvoice = () => {
+    if (currentInvoice) {
+      const invoiceToSave = {
+        ...currentInvoice,
+        status: 'saved' as const,
+        updatedAt: new Date().toISOString()
+      };
+
+      const updatedInvoices = savedInvoices.some(inv => inv.id === currentInvoice.id)
+        ? savedInvoices.map(inv => inv.id === currentInvoice.id ? invoiceToSave : inv)
+        : [...savedInvoices, invoiceToSave];
+
+      setSavedInvoices(updatedInvoices);
+      localStorage.setItem('savedInvoices', JSON.stringify(updatedInvoices));
+      setCurrentInvoice(invoiceToSave);
+    }
+  };
+
+  const loadInvoice = (id: string) => {
+    const invoice = savedInvoices.find(inv => inv.id === id);
+    if (invoice) {
+      setCurrentInvoice(invoice);
+    }
+  };
+
+  const deleteInvoice = (id: string) => {
+    const updatedInvoices = savedInvoices.filter(inv => inv.id !== id);
+    setSavedInvoices(updatedInvoices);
+    localStorage.setItem('savedInvoices', JSON.stringify(updatedInvoices));
+    
+    if (currentInvoice?.id === id) {
+      setCurrentInvoice(null);
+    }
+  };
+
+  const getSavedInvoices = () => savedInvoices;
+
   return (
     <InvoiceContext.Provider value={{
       currentInvoice,
+      savedInvoices,
       createNewInvoice,
       updateInvoice,
       addInvoiceItem,
       updateInvoiceItem,
       removeInvoiceItem,
-      calculateTotals
+      calculateTotals,
+      saveInvoice,
+      loadInvoice,
+      deleteInvoice,
+      getSavedInvoices
     }}>
       {children}
     </InvoiceContext.Provider>

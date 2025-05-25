@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -97,5 +98,32 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .print\:hidden {
+    display: none !important;
+  }
+  
+  .print\:p-0 {
+    padding: 0 !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .invoice-container {
+    max-width: none !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  
+  @page {
+    margin: 0.5in;
+    size: A4;
   }
 }

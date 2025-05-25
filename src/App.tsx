@@ -11,6 +11,8 @@ import Vendors from "./pages/Vendors";
 import Parties from "./pages/Parties";
 import Products from "./pages/Products";
 import InvoiceGenerator from "./pages/InvoiceGenerator";
+import SavedInvoices from "./pages/SavedInvoices";
+import AdminSettings from "./pages/AdminSettings";
 import Navigation from "./components/Navigation";
 import NotFound from "./pages/NotFound";
 
@@ -32,6 +34,8 @@ const App = () => (
                 <Route path="/parties" element={<Parties />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/invoice" element={<InvoiceGenerator />} />
+                <Route path="/saved-invoices" element={<SavedInvoices />} />
+                <Route path="/admin" element={<AdminSettings />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

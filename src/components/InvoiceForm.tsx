@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useInvoice } from '../contexts/InvoiceContext';
 import { useMasterData } from '../contexts/MasterDataContext';
@@ -11,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
 const InvoiceForm = () => {
-  const { currentInvoice, updateInvoice, addInvoiceItem, calculateTotals } = useInvoice();
+  const { currentInvoice, updateInvoice, addInvoiceItem, calculateTotals, saveInvoice, createNewInvoice } = useInvoice();
   const { vendors, parties, products } = useMasterData();
   const { toast } = useToast();
 
@@ -85,8 +84,52 @@ const InvoiceForm = () => {
     });
   };
 
+  const handleSaveInvoice = () => {
+    if (!currentInvoice?.vendorId || !currentInvoice?.partyId) {
+      toast({
+        title: "Error",
+        description: "Please select vendor and party before saving",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (currentInvoice.items.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please add at least one item before saving",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    saveInvoice();
+    toast({
+      title: "Success",
+      description: "Invoice saved successfully"
+    });
+  };
+
+  const handleNewInvoice = () => {
+    createNewInvoice();
+    toast({
+      title: "Success",
+      description: "New invoice created"
+    });
+  };
+
   return (
     <div className="space-y-6">
+      {/* Action Buttons */}
+      <div className="flex gap-2 mb-4">
+        <Button onClick={handleNewInvoice} variant="outline">
+          New Invoice
+        </Button>
+        <Button onClick={handleSaveInvoice} className="bg-green-600 hover:bg-green-700">
+          Save Invoice
+        </Button>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Invoice Details</CardTitle>
