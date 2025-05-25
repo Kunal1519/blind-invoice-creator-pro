@@ -1,16 +1,15 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
 interface CompanySettings {
   companyName: string;
   logo: string;
-  logoFile?: File;
   address: string;
   phone: string;
   email: string;
@@ -19,6 +18,17 @@ interface CompanySettings {
   accountNumber: string;
   accountName: string;
   branchName: string;
+  // Charge options
+  showPackingCharges: boolean;
+  showPelmetCharges: boolean;
+  showCourierCharges: boolean;
+  showInstallationCharges: boolean;
+  showLocalCartageCharges: boolean;
+  // GST options
+  gstOnMotorEnabled: boolean;
+  gstOnMotorPercentage: number;
+  gstOnItemsEnabled: boolean;
+  gstOnItemsPercentage: number;
 }
 
 const AdminSettings = () => {
@@ -36,7 +46,16 @@ const AdminSettings = () => {
       bankName: 'KOTAK MAHINDRA BANK',
       accountNumber: '9811200093',
       accountName: 'CREATIVE INTERIORS',
-      branchName: 'RANA PRATAP BAGH DELHI'
+      branchName: 'RANA PRATAP BAGH DELHI',
+      showPackingCharges: true,
+      showPelmetCharges: true,
+      showCourierCharges: true,
+      showInstallationCharges: true,
+      showLocalCartageCharges: true,
+      gstOnMotorEnabled: true,
+      gstOnMotorPercentage: 18,
+      gstOnItemsEnabled: true,
+      gstOnItemsPercentage: 18
     };
   });
 
@@ -59,7 +78,16 @@ const AdminSettings = () => {
       bankName: 'KOTAK MAHINDRA BANK',
       accountNumber: '9811200093',
       accountName: 'CREATIVE INTERIORS',
-      branchName: 'RANA PRATAP BAGH DELHI'
+      branchName: 'RANA PRATAP BAGH DELHI',
+      showPackingCharges: true,
+      showPelmetCharges: true,
+      showCourierCharges: true,
+      showInstallationCharges: true,
+      showLocalCartageCharges: true,
+      gstOnMotorEnabled: true,
+      gstOnMotorPercentage: 18,
+      gstOnItemsEnabled: true,
+      gstOnItemsPercentage: 18
     };
     setSettings(defaultSettings);
   };
@@ -67,16 +95,51 @@ const AdminSettings = () => {
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Error",
+          description: "Please select a valid image file",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "Image size should be less than 5MB",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
+        const result = e.target?.result as string;
         setSettings({ 
           ...settings, 
-          logo: e.target?.result as string,
-          logoFile: file 
+          logo: result
+        });
+        toast({
+          title: "Success",
+          description: "Logo uploaded successfully"
+        });
+      };
+      reader.onerror = () => {
+        toast({
+          title: "Error",
+          description: "Failed to upload logo",
+          variant: "destructive"
         });
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const clearLogo = () => {
+    setSettings({ ...settings, logo: 'SONAL' });
   };
 
   return (
@@ -102,21 +165,35 @@ const AdminSettings = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="logo">Logo Text/Upload Logo</Label>
+                <Label htmlFor="logo">Company Logo</Label>
                 <div className="space-y-2">
                   <Input
                     id="logo"
                     value={typeof settings.logo === 'string' && !settings.logo.startsWith('data:') ? settings.logo : ''}
                     onChange={(e) => setSettings({ ...settings, logo: e.target.value })}
-                    placeholder="Logo text (e.g., SONAL)"
+                    placeholder="Logo text (e.g., SONAL) or upload image below"
                   />
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                  />
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      className="flex-1"
+                    />
+                    {settings.logo && settings.logo.startsWith('data:') && (
+                      <Button onClick={clearLogo} variant="outline" size="sm">
+                        Clear
+                      </Button>
+                    )}
+                  </div>
                   {settings.logo && settings.logo.startsWith('data:') && (
-                    <img src={settings.logo} alt="Logo preview" className="w-16 h-16 object-contain border rounded" />
+                    <div className="mt-2">
+                      <img 
+                        src={settings.logo} 
+                        alt="Logo preview" 
+                        className="w-20 h-20 object-contain border rounded p-2" 
+                      />
+                    </div>
                   )}
                 </div>
               </div>
@@ -203,6 +280,115 @@ const AdminSettings = () => {
                   value={settings.branchName}
                   onChange={(e) => setSettings({ ...settings, branchName: e.target.value })}
                 />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>GST Configuration</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="gstOnMotor"
+                    checked={settings.gstOnMotorEnabled}
+                    onCheckedChange={(checked) => setSettings({ ...settings, gstOnMotorEnabled: checked })}
+                  />
+                  <Label htmlFor="gstOnMotor">GST on Motor</Label>
+                </div>
+                {settings.gstOnMotorEnabled && (
+                  <div>
+                    <Label htmlFor="gstMotorPercent">GST Percentage for Motor</Label>
+                    <Input
+                      id="gstMotorPercent"
+                      type="number"
+                      step="0.01"
+                      value={settings.gstOnMotorPercentage}
+                      onChange={(e) => setSettings({ ...settings, gstOnMotorPercentage: parseFloat(e.target.value) || 18 })}
+                    />
+                  </div>
+                )}
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="gstOnItems"
+                    checked={settings.gstOnItemsEnabled}
+                    onCheckedChange={(checked) => setSettings({ ...settings, gstOnItemsEnabled: checked })}
+                  />
+                  <Label htmlFor="gstOnItems">GST on Items</Label>
+                </div>
+                {settings.gstOnItemsEnabled && (
+                  <div>
+                    <Label htmlFor="gstItemsPercent">GST Percentage for Items</Label>
+                    <Input
+                      id="gstItemsPercent"
+                      type="number"
+                      step="0.01"
+                      value={settings.gstOnItemsPercentage}
+                      onChange={(e) => setSettings({ ...settings, gstOnItemsPercentage: parseFloat(e.target.value) || 18 })}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Additional Charges Display Options</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="showPacking"
+                  checked={settings.showPackingCharges}
+                  onCheckedChange={(checked) => setSettings({ ...settings, showPackingCharges: checked })}
+                />
+                <Label htmlFor="showPacking">Show Packing Charges</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="showPelmet"
+                  checked={settings.showPelmetCharges}
+                  onCheckedChange={(checked) => setSettings({ ...settings, showPelmetCharges: checked })}
+                />
+                <Label htmlFor="showPelmet">Show Pelmet Charges</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="showCourier"
+                  checked={settings.showCourierCharges}
+                  onCheckedChange={(checked) => setSettings({ ...settings, showCourierCharges: checked })}
+                />
+                <Label htmlFor="showCourier">Show Courier Charges</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="showInstallation"
+                  checked={settings.showInstallationCharges}
+                  onCheckedChange={(checked) => setSettings({ ...settings, showInstallationCharges: checked })}
+                />
+                <Label htmlFor="showInstallation">Show Installation Charges</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="showLocalCartage"
+                  checked={settings.showLocalCartageCharges}
+                  onCheckedChange={(checked) => setSettings({ ...settings, showLocalCartageCharges: checked })}
+                />
+                <Label htmlFor="showLocalCartage">Show Local Cartage Charges</Label>
               </div>
             </div>
           </CardContent>

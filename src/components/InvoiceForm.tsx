@@ -14,6 +14,12 @@ const InvoiceForm = () => {
   const { vendors, parties, products } = useMasterData();
   const { toast } = useToast();
 
+  // Get company settings
+  const [companySettings, setCompanySettings] = useState(() => {
+    const saved = localStorage.getItem('companySettings');
+    return saved ? JSON.parse(saved) : {};
+  });
+
   const [itemForm, setItemForm] = useState({
     productId: '',
     quantity: 1,
@@ -308,49 +314,59 @@ const InvoiceForm = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="packing">Packing Charges</Label>
-              <Input
-                id="packing"
-                type="number"
-                step="0.01"
-                value={currentInvoice?.packingCharges || 0}
-                onChange={(e) => updateInvoice({ packingCharges: parseFloat(e.target.value) || 0 })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="pelmet">Pelmet Charges</Label>
-              <Input
-                id="pelmet"
-                type="number"
-                step="0.01"
-                value={currentInvoice?.pelmetCharges || 0}
-                onChange={(e) => updateInvoice({ pelmetCharges: parseFloat(e.target.value) || 0 })}
-              />
-            </div>
+            {companySettings.showPackingCharges !== false && (
+              <div>
+                <Label htmlFor="packing">Packing Charges</Label>
+                <Input
+                  id="packing"
+                  type="number"
+                  step="0.01"
+                  value={currentInvoice?.packingCharges || 0}
+                  onChange={(e) => updateInvoice({ packingCharges: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+            )}
+            
+            {companySettings.showPelmetCharges !== false && (
+              <div>
+                <Label htmlFor="pelmet">Pelmet Charges</Label>
+                <Input
+                  id="pelmet"
+                  type="number"
+                  step="0.01"
+                  value={currentInvoice?.pelmetCharges || 0}
+                  onChange={(e) => updateInvoice({ pelmetCharges: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="courier">Courier Charges</Label>
-              <Input
-                id="courier"
-                type="number"
-                step="0.01"
-                value={currentInvoice?.courierCharges || 0}
-                onChange={(e) => updateInvoice({ courierCharges: parseFloat(e.target.value) || 0 })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="installation">Installation Charges</Label>
-              <Input
-                id="installation"
-                type="number"
-                step="0.01"
-                value={currentInvoice?.installationCharges || 0}
-                onChange={(e) => updateInvoice({ installationCharges: parseFloat(e.target.value) || 0 })}
-              />
-            </div>
+            {companySettings.showCourierCharges !== false && (
+              <div>
+                <Label htmlFor="courier">Courier Charges</Label>
+                <Input
+                  id="courier"
+                  type="number"
+                  step="0.01"
+                  value={currentInvoice?.courierCharges || 0}
+                  onChange={(e) => updateInvoice({ courierCharges: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+            )}
+            
+            {companySettings.showInstallationCharges !== false && (
+              <div>
+                <Label htmlFor="installation">Installation Charges</Label>
+                <Input
+                  id="installation"
+                  type="number"
+                  step="0.01"
+                  value={currentInvoice?.installationCharges || 0}
+                  onChange={(e) => updateInvoice({ installationCharges: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex items-center space-x-2">

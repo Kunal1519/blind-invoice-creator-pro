@@ -68,17 +68,25 @@ const InvoicePreview = () => {
           <div className="invoice-header text-center mb-6 border-2 border-black p-4">
             <div className="flex items-center justify-center mb-2">
               <div className="mr-4">
-                <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">{companySettings.logo || 'SONAL'}</span>
-                </div>
+                {companySettings.logo && companySettings.logo.startsWith('data:') ? (
+                  <img 
+                    src={companySettings.logo} 
+                    alt="Company Logo" 
+                    className="w-16 h-16 object-contain"
+                  />
+                ) : (
+                  <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">{companySettings.logo || 'SONAL'}</span>
+                  </div>
+                )}
               </div>
               <h1 className="text-2xl font-bold text-red-600">{companySettings.companyName || 'CREATIVE INTERIORS'}</h1>
             </div>
             <div className="text-sm">
-              <p>ADDRESS: H.NO.-174, OPP. YADAV BAKERY, VILLAGE BHALSWA, JAHANGIR PURI DELHI</p>
+              <p>ADDRESS: {companySettings.address || 'H.NO.-174, OPP. YADAV BAKERY, VILLAGE BHALSWA, JAHANGIR PURI DELHI'}</p>
               <div className="flex justify-between">
-                <span>TEL. NO. - +919811400093, 9811200093</span>
-                <span>Email Id: sonatablinds@gmail.com</span>
+                <span>TEL. NO. - {companySettings.phone || '+919811400093, 9811200093'}</span>
+                <span>Email Id: {companySettings.email || 'sonatablinds@gmail.com'}</span>
               </div>
             </div>
           </div>
@@ -110,7 +118,7 @@ const InvoicePreview = () => {
                   <span className="font-semibold">GST No.:</span>
                 </div>
                 <div className="border border-black p-2">
-                  {currentInvoice.gstNo || '07AFFPJ4441N1Z9'}
+                  {currentInvoice.gstNo || companySettings.gstNo || '07AFFPJ4441N1Z9'}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -235,19 +243,19 @@ const InvoicePreview = () => {
               <div className="p-2 space-y-2">
                 <div className="grid grid-cols-2">
                   <span className="font-semibold">A/C No :-</span>
-                  <span>9811200093</span>
+                  <span>{companySettings.accountNumber || '9811200093'}</span>
                 </div>
                 <div className="grid grid-cols-2">
                   <span className="font-semibold">A/C Name :-</span>
-                  <span>CREATIVE INTERIORS</span>
+                  <span>{companySettings.accountName || 'CREATIVE INTERIORS'}</span>
                 </div>
                 <div className="grid grid-cols-2">
                   <span className="font-semibold">Bank Name :-</span>
-                  <span>KOTAK MAHINDRA BANK</span>
+                  <span>{companySettings.bankName || 'KOTAK MAHINDRA BANK'}</span>
                 </div>
                 <div className="grid grid-cols-2">
                   <span className="font-semibold">Branch Name :-</span>
-                  <span>RANA PRATAP BAGH DELHI</span>
+                  <span>{companySettings.branchName || 'RANA PRATAP BAGH DELHI'}</span>
                 </div>
               </div>
             </div>
@@ -277,19 +285,21 @@ const InvoicePreview = () => {
                   {(currentInvoice.items.reduce((sum, item) => sum + item.amount, 0) - currentInvoice.discountAmount).toFixed(2)}
                 </div>
 
-                {currentInvoice.pelmetCharges > 0 && (
+                {(companySettings.showPelmetCharges !== false && currentInvoice.pelmetCharges > 0) && (
                   <>
                     <div className="bg-yellow-200 border border-black p-1 font-semibold">
                       PELMET CHARGE- 150/ PER. R.FT
                     </div>
-                    <div className="border border-black p-1 text-right"></div>
+                    <div className="border border-black p-1 text-right">
+                      {currentInvoice.pelmetCharges.toFixed(2)}
+                    </div>
                   </>
                 )}
 
                 <div className="bg-yellow-200 border border-black p-1 font-semibold">BILTY</div>
                 <div className="border border-black p-1 text-right"></div>
 
-                {currentInvoice.packingCharges > 0 && (
+                {(companySettings.showPackingCharges !== false && currentInvoice.packingCharges > 0) && (
                   <>
                     <div className="bg-yellow-200 border border-black p-1 font-semibold">
                       PACKING CHARGES -
@@ -300,7 +310,7 @@ const InvoicePreview = () => {
                   </>
                 )}
 
-                {currentInvoice.courierCharges > 0 && (
+                {(companySettings.showCourierCharges !== false && currentInvoice.courierCharges > 0) && (
                   <>
                     <div className="bg-yellow-200 border border-black p-1 font-semibold">
                       COURIER CHARGE -
@@ -311,12 +321,16 @@ const InvoicePreview = () => {
                   </>
                 )}
 
-                <div className="bg-yellow-200 border border-black p-1 font-semibold">
-                  LOCAL CARTAGE CHARGE -
-                </div>
-                <div className="border border-black p-1 text-right"></div>
+                {companySettings.showLocalCartageCharges !== false && (
+                  <>
+                    <div className="bg-yellow-200 border border-black p-1 font-semibold">
+                      LOCAL CARTAGE CHARGE -
+                    </div>
+                    <div className="border border-black p-1 text-right"></div>
+                  </>
+                )}
 
-                {currentInvoice.installationCharges > 0 && (
+                {(companySettings.showInstallationCharges !== false && currentInvoice.installationCharges > 0) && (
                   <>
                     <div className="bg-yellow-200 border border-black p-1 font-semibold">
                       INSTALLATION CHARGE/200-PER BLIND
@@ -336,10 +350,14 @@ const InvoicePreview = () => {
 
                 {currentInvoice.gstEnabled && (
                   <>
-                    <div className="bg-yellow-200 border border-black p-1 font-semibold">
-                      GST {currentInvoice.gstPercentage}% ON MOTER
-                    </div>
-                    <div className="border border-black p-1 text-right"></div>
+                    {companySettings.gstOnMotorEnabled && (
+                      <>
+                        <div className="bg-yellow-200 border border-black p-1 font-semibold">
+                          GST {companySettings.gstOnMotorPercentage || 18}% ON MOTOR
+                        </div>
+                        <div className="border border-black p-1 text-right"></div>
+                      </>
+                    )}
                     
                     <div className="bg-yellow-200 border border-black p-1 font-semibold">GST</div>
                     <div className="border border-black p-1 text-right font-semibold">
