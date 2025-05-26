@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 
 const InvoiceForm = () => {
@@ -29,6 +30,8 @@ const InvoiceForm = () => {
     heightCm: 0,
     unit: 'inches' as 'inches' | 'cm'
   });
+
+  const [pelmetGstEnabled, setPelmetGstEnabled] = useState(false);
 
   useEffect(() => {
     calculateTotals();
@@ -126,13 +129,10 @@ const InvoiceForm = () => {
 
   return (
     <div className="space-y-6">
-      {/* Action Buttons */}
+      {/* Action Buttons - Only New Invoice */}
       <div className="flex gap-2 mb-4">
         <Button onClick={handleNewInvoice} variant="outline">
           New Invoice
-        </Button>
-        <Button onClick={handleSaveInvoice} className="bg-green-600 hover:bg-green-700">
-          Save Invoice
         </Button>
       </div>
 
@@ -337,6 +337,14 @@ const InvoiceForm = () => {
                   value={currentInvoice?.pelmetCharges || 0}
                   onChange={(e) => updateInvoice({ pelmetCharges: parseFloat(e.target.value) || 0 })}
                 />
+                <div className="flex items-center space-x-2 mt-2">
+                  <Checkbox
+                    id="pelmetGst"
+                    checked={pelmetGstEnabled}
+                    onCheckedChange={setPelmetGstEnabled}
+                  />
+                  <Label htmlFor="pelmetGst" className="text-sm">Apply GST on Pelmet</Label>
+                </div>
               </div>
             )}
           </div>
@@ -392,6 +400,13 @@ const InvoiceForm = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Save Button moved to bottom */}
+      <div className="flex justify-center">
+        <Button onClick={handleSaveInvoice} className="bg-green-600 hover:bg-green-700 px-8">
+          Save Invoice
+        </Button>
+      </div>
     </div>
   );
 };
