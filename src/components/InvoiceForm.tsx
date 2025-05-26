@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useInvoice } from '../contexts/InvoiceContext';
 import { useMasterData } from '../contexts/MasterDataContext';
@@ -341,7 +342,7 @@ const InvoiceForm = () => {
                   <Checkbox
                     id="pelmetGst"
                     checked={pelmetGstEnabled}
-                    onCheckedChange={setPelmetGstEnabled}
+                    onCheckedChange={(checked) => setPelmetGstEnabled(checked === true)}
                   />
                   <Label htmlFor="pelmetGst" className="text-sm">Apply GST on Pelmet</Label>
                 </div>
