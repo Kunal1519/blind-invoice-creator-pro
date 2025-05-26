@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useInvoice } from '../contexts/InvoiceContext';
 import { useMasterData } from '../contexts/MasterDataContext';
@@ -32,7 +31,7 @@ const InvoiceForm = () => {
     unit: 'inches' as 'inches' | 'cm'
   });
 
-  const [pelmetGstEnabled, setPelmetGstEnabled] = useState(false);
+  const [motorGstEnabled, setMotorGstEnabled] = useState(false);
 
   useEffect(() => {
     calculateTotals();
@@ -338,14 +337,6 @@ const InvoiceForm = () => {
                   value={currentInvoice?.pelmetCharges || 0}
                   onChange={(e) => updateInvoice({ pelmetCharges: parseFloat(e.target.value) || 0 })}
                 />
-                <div className="flex items-center space-x-2 mt-2">
-                  <Checkbox
-                    id="pelmetGst"
-                    checked={pelmetGstEnabled}
-                    onCheckedChange={(checked) => setPelmetGstEnabled(checked === true)}
-                  />
-                  <Label htmlFor="pelmetGst" className="text-sm">Apply GST on Pelmet</Label>
-                </div>
               </div>
             )}
           </div>
@@ -397,6 +388,14 @@ const InvoiceForm = () => {
                 value={currentInvoice?.gstPercentage || 18}
                 onChange={(e) => updateInvoice({ gstPercentage: parseFloat(e.target.value) || 18 })}
               />
+              <div className="flex items-center space-x-2 mt-2">
+                <Checkbox
+                  id="motorGst"
+                  checked={motorGstEnabled}
+                  onCheckedChange={(checked) => setMotorGstEnabled(checked === true)}
+                />
+                <Label htmlFor="motorGst" className="text-sm">Apply GST on Motor</Label>
+              </div>
             </div>
           )}
         </CardContent>
