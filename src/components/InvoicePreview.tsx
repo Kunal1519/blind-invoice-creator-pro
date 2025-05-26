@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useInvoice } from '../contexts/InvoiceContext';
 import { useMasterData } from '../contexts/MasterDataContext';
@@ -29,6 +30,10 @@ const InvoicePreview = () => {
 
   // Get company settings from localStorage
   const companySettings = JSON.parse(localStorage.getItem('companySettings') || '{}');
+
+  // Check if there are motor items
+  const hasMotorItems = currentInvoice.items.some(item => item.isMotorItem);
+  const motorItems = currentInvoice.items.filter(item => item.isMotorItem);
 
   const handlePrint = () => {
     const printContent = document.querySelector('.invoice-container');
@@ -183,9 +188,12 @@ const InvoicePreview = () => {
               <tbody>
                 {currentInvoice.items && currentInvoice.items.length > 0 ? (
                   currentInvoice.items.map((item, index) => (
-                    <tr key={item.id}>
+                    <tr key={item.id} className={item.isMotorItem ? 'bg-blue-50' : ''}>
                       <td className="border border-black p-1 text-center">{index + 1}</td>
-                      <td className="border border-black p-1">{item.productName}</td>
+                      <td className="border border-black p-1">
+                        {item.productName}
+                        {item.isMotorItem && <span className="ml-1 text-blue-600 font-semibold">(Motor)</span>}
+                      </td>
                       <td className="border border-black p-1">{item.shade}</td>
                       <td className="border border-black p-1">{item.shadeColor}</td>
                       <td className="border border-black p-1">{item.operationType}</td>
@@ -351,18 +359,23 @@ const InvoicePreview = () => {
 
                 {currentInvoice.gstEnabled && (
                   <>
-                    {companySettings.gstOnMotorEnabled && (
-                      <>
-                        <div className="bg-yellow-200 border border-black p-1 font-semibold">
-                          GST {companySettings.gstOnMotorPercentage || 18}% ON MOTOR
-                        </div>
-                        <div className="border border-black p-1 text-right"></div>
-                      </>
-                    )}
-                    
-                    <div className="bg-yellow-200 border border-black p-1 font-semibold">GST</div>
-                    <div className="border border-black p-1 text-right font-semibold">
-                      {currentInvoice.gstPercentage}%
+                    <div className="bg-yellow-200 border border-black p-1 font-semibold">
+                      GST {currentInvoice.gstPercentage}%
+                    </div>
+                    <div className="border border-black p-1 text-right">
+                      {currentInvoice.gstAmount.toFixed(2)}
+                    </div>
+                  </>
+                )}
+
+                {/* Motor GST Display */}
+                {hasMotorItems && currentInvoice.motorGstEnabled && currentInvoice.motorGstAmount > 0 && (
+                  <>
+                    <div className="bg-blue-200 border border-black p-1 font-semibold">
+                      MOTOR GST {currentInvoice.motorGstPercentage}%
+                    </div>
+                    <div className="border border-black p-1 text-right">
+                      {currentInvoice.motorGstAmount.toFixed(2)}
                     </div>
                   </>
                 )}
@@ -371,7 +384,7 @@ const InvoicePreview = () => {
                   TOTAL TAX AMOUNT -
                 </div>
                 <div className="border border-black p-1 text-right">
-                  {currentInvoice.gstAmount.toFixed(2)}
+                  {(currentInvoice.gstAmount + (currentInvoice.motorGstAmount || 0)).toFixed(2)}
                 </div>
 
                 <div className="bg-yellow-200 border border-black p-1 font-semibold">

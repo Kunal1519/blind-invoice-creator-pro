@@ -9,7 +9,294 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      invoice_items: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          height_cm: number | null
+          height_inches: number | null
+          id: string
+          invoice_id: string | null
+          is_motor_item: boolean | null
+          operation_type: string | null
+          price_per_sq_ft: number | null
+          product_id: string | null
+          product_name: string
+          quantity: number | null
+          shade: string | null
+          shade_color: string | null
+          sq_ft: number | null
+          unit: string | null
+          width_cm: number | null
+          width_inches: number | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          height_cm?: number | null
+          height_inches?: number | null
+          id?: string
+          invoice_id?: string | null
+          is_motor_item?: boolean | null
+          operation_type?: string | null
+          price_per_sq_ft?: number | null
+          product_id?: string | null
+          product_name: string
+          quantity?: number | null
+          shade?: string | null
+          shade_color?: string | null
+          sq_ft?: number | null
+          unit?: string | null
+          width_cm?: number | null
+          width_inches?: number | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          height_cm?: number | null
+          height_inches?: number | null
+          id?: string
+          invoice_id?: string | null
+          is_motor_item?: boolean | null
+          operation_type?: string | null
+          price_per_sq_ft?: number | null
+          product_id?: string | null
+          product_name?: string
+          quantity?: number | null
+          shade?: string | null
+          shade_color?: string | null
+          sq_ft?: number | null
+          unit?: string | null
+          width_cm?: number | null
+          width_inches?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          courier_charges: number | null
+          created_at: string | null
+          date: string | null
+          discount_amount: number | null
+          discount_percentage: number | null
+          grand_total: number | null
+          gst_amount: number | null
+          gst_enabled: boolean | null
+          gst_no: string | null
+          gst_percentage: number | null
+          id: string
+          installation_charges: number | null
+          invoice_number: string
+          motor_gst_amount: number | null
+          motor_gst_enabled: boolean | null
+          motor_gst_percentage: number | null
+          packing_charges: number | null
+          party_id: string | null
+          pelmet_charges: number | null
+          status: string | null
+          total_amount_before_tax: number | null
+          total_material: number | null
+          total_payment: number | null
+          total_sq_ft: number | null
+          updated_at: string | null
+          user_id: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          courier_charges?: number | null
+          created_at?: string | null
+          date?: string | null
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          grand_total?: number | null
+          gst_amount?: number | null
+          gst_enabled?: boolean | null
+          gst_no?: string | null
+          gst_percentage?: number | null
+          id?: string
+          installation_charges?: number | null
+          invoice_number: string
+          motor_gst_amount?: number | null
+          motor_gst_enabled?: boolean | null
+          motor_gst_percentage?: number | null
+          packing_charges?: number | null
+          party_id?: string | null
+          pelmet_charges?: number | null
+          status?: string | null
+          total_amount_before_tax?: number | null
+          total_material?: number | null
+          total_payment?: number | null
+          total_sq_ft?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          courier_charges?: number | null
+          created_at?: string | null
+          date?: string | null
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          grand_total?: number | null
+          gst_amount?: number | null
+          gst_enabled?: boolean | null
+          gst_no?: string | null
+          gst_percentage?: number | null
+          id?: string
+          installation_charges?: number | null
+          invoice_number?: string
+          motor_gst_amount?: number | null
+          motor_gst_enabled?: boolean | null
+          motor_gst_percentage?: number | null
+          packing_charges?: number | null
+          party_id?: string | null
+          pelmet_charges?: number | null
+          status?: string | null
+          total_amount_before_tax?: number | null
+          total_material?: number | null
+          total_payment?: number | null
+          total_sq_ft?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parties: {
+        Row: {
+          address: string | null
+          contact_person: string | null
+          created_at: string | null
+          email: string | null
+          gst_no: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          contact_person?: string | null
+          created_at?: string | null
+          email?: string | null
+          gst_no?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          contact_person?: string | null
+          created_at?: string | null
+          email?: string | null
+          gst_no?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string
+          is_motor_item: boolean | null
+          name: string
+          operation_type: string | null
+          price_per_sq_ft: number | null
+          shade: string | null
+          shade_color: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_motor_item?: boolean | null
+          name: string
+          operation_type?: string | null
+          price_per_sq_ft?: number | null
+          shade?: string | null
+          shade_color?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_motor_item?: boolean | null
+          name?: string
+          operation_type?: string | null
+          price_per_sq_ft?: number | null
+          shade?: string | null
+          shade_color?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      vendors: {
+        Row: {
+          address: string | null
+          contact: string | null
+          created_at: string | null
+          email: string | null
+          gst_no: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          contact?: string | null
+          created_at?: string | null
+          email?: string | null
+          gst_no?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          contact?: string | null
+          created_at?: string | null
+          email?: string | null
+          gst_no?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

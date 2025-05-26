@@ -17,6 +17,7 @@ export interface InvoiceItem {
   sqFt: number;
   pricePerSqFt: number;
   amount: number;
+  isMotorItem: boolean;
 }
 
 export interface Invoice {
@@ -39,6 +40,9 @@ export interface Invoice {
   gstEnabled: boolean;
   gstPercentage: number;
   gstAmount: number;
+  motorGstEnabled: boolean;
+  motorGstPercentage: number;
+  motorGstAmount: number;
   grandTotal: number;
   totalPayment: number;
   status: 'draft' | 'saved' | 'sent';
@@ -99,6 +103,9 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       gstEnabled: true,
       gstPercentage: 18,
       gstAmount: 0,
+      motorGstEnabled: false,
+      motorGstPercentage: 18,
+      motorGstAmount: 0,
       grandTotal: 0,
       totalPayment: 0,
       status: 'draft',
@@ -191,8 +198,20 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
                                    currentInvoice.pelmetCharges + currentInvoice.courierCharges + 
                                    currentInvoice.installationCharges;
       
-      const gstAmount = currentInvoice.gstEnabled ? (totalAmountBeforeTax * currentInvoice.gstPercentage) / 100 : 0;
-      const grandTotal = totalAmountBeforeTax + gstAmount;
+      // Check if there are motor items to determine if motor GST should be enabled
+      const hasMotorItems = currentInvoice.items.some(item => item.isMotorItem);
+      const motorGstEnabled = hasMotorItems && currentInvoice.motorGstEnabled;
+      
+      // Calculate motor items total for motor GST calculation
+      const motorItemsTotal = currentInvoice.items
+        .filter(item => item.isMotorItem)
+        .reduce((sum, item) => sum + item.amount, 0);
+      
+      const motorGstAmount = motorGstEnabled ? (motorItemsTotal * currentInvoice.motorGstPercentage) / 100 : 0;
+      const regularGstAmount = currentInvoice.gstEnabled ? (totalAmountBeforeTax * currentInvoice.gstPercentage) / 100 : 0;
+      
+      const totalGstAmount = regularGstAmount + motorGstAmount;
+      const grandTotal = totalAmountBeforeTax + totalGstAmount;
 
       setCurrentInvoice({
         ...currentInvoice,
@@ -200,7 +219,9 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         totalSqFt: parseFloat(totalSqFt.toFixed(2)),
         discountAmount: parseFloat(discountAmount.toFixed(2)),
         totalAmountBeforeTax: parseFloat(totalAmountBeforeTax.toFixed(2)),
-        gstAmount: parseFloat(gstAmount.toFixed(2)),
+        gstAmount: parseFloat(regularGstAmount.toFixed(2)),
+        motorGstAmount: parseFloat(motorGstAmount.toFixed(2)),
+        motorGstEnabled: hasMotorItems ? currentInvoice.motorGstEnabled : false,
         grandTotal: parseFloat(grandTotal.toFixed(2)),
         totalPayment: parseFloat(grandTotal.toFixed(2)),
         updatedAt: new Date().toISOString()

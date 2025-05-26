@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const InvoiceForm = () => {
   const { currentInvoice, updateInvoice, addInvoiceItem, calculateTotals, saveInvoice, createNewInvoice } = useInvoice();
-  const { vendors, parties, products } = useMasterData();
+  const { vendors, parties, products, loading } = useMasterData();
   const { toast } = useToast();
 
   // Get company settings
@@ -32,16 +32,26 @@ const InvoiceForm = () => {
     unit: 'inches' as 'inches' | 'cm'
   });
 
-  const [motorGstEnabled, setMotorGstEnabled] = useState(false);
-  const [motorGstPercentage, setMotorGstPercentage] = useState(18);
-
   useEffect(() => {
     calculateTotals();
   }, [currentInvoice?.items, currentInvoice?.discountPercentage, currentInvoice?.packingCharges, 
       currentInvoice?.pelmetCharges, currentInvoice?.courierCharges, currentInvoice?.installationCharges,
-      currentInvoice?.gstEnabled, currentInvoice?.gstPercentage, calculateTotals]);
+      currentInvoice?.gstEnabled, currentInvoice?.gstPercentage, currentInvoice?.motorGstEnabled,
+      currentInvoice?.motorGstPercentage, calculateTotals]);
+
+  // Check if there are motor items in the invoice
+  const hasMotorItems = currentInvoice?.items.some(item => item.isMotorItem) || false;
 
   const handleAddItem = () => {
+    if (loading) {
+      toast({
+        title: "Loading",
+        description: "Please wait while data is loading",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const selectedProduct = products.find(p => p.id === itemForm.productId);
     if (!selectedProduct) {
       toast({
@@ -76,7 +86,8 @@ const InvoiceForm = () => {
       widthCm: itemForm.widthCm,
       heightCm: itemForm.heightCm,
       unit: itemForm.unit,
-      pricePerSqFt: selectedProduct.pricePerSqFt
+      pricePerSqFt: selectedProduct.pricePerSqFt,
+      isMotorItem: selectedProduct.isMotorItem || false
     });
 
     setItemForm({
@@ -123,17 +134,23 @@ const InvoiceForm = () => {
 
   const handleNewInvoice = () => {
     createNewInvoice();
-    setMotorGstEnabled(false);
-    setMotorGstPercentage(18);
     toast({
       title: "Success",
       description: "New invoice created"
     });
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-lg">Loading master data...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Action Buttons - Only New Invoice */}
+      {/* Action Buttons */}
       <div className="flex gap-2 mb-4">
         <Button onClick={handleNewInvoice} variant="outline">
           New Invoice
@@ -228,7 +245,7 @@ const InvoiceForm = () => {
               <SelectContent>
                 {products.map((product) => (
                   <SelectItem key={product.id} value={product.id}>
-                    {product.name} - {product.shade}
+                    {product.name} - {product.shade} {product.isMotorItem ? '(Motor)' : ''}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -395,25 +412,30 @@ const InvoiceForm = () => {
                 />
               </div>
               
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="motorGst"
-                  checked={motorGstEnabled}
-                  onCheckedChange={(checked) => setMotorGstEnabled(checked === true)}
-                />
-                <Label htmlFor="motorGst" className="text-sm">Apply GST on Motor</Label>
-              </div>
+              {/* Motor GST - Only show if there are motor items */}
+              {hasMotorItems && (
+                <div className="space-y-4 border-t pt-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="motorGst"
+                      checked={currentInvoice?.motorGstEnabled || false}
+                      onCheckedChange={(checked) => updateInvoice({ motorGstEnabled: checked === true })}
+                    />
+                    <Label htmlFor="motorGst" className="text-sm">Apply GST on Motor Items</Label>
+                  </div>
 
-              {motorGstEnabled && (
-                <div>
-                  <Label htmlFor="motorGstPercent">Motor GST Percentage</Label>
-                  <Input
-                    id="motorGstPercent"
-                    type="number"
-                    step="0.01"
-                    value={motorGstPercentage}
-                    onChange={(e) => setMotorGstPercentage(parseFloat(e.target.value) || 18)}
-                  />
+                  {currentInvoice?.motorGstEnabled && (
+                    <div>
+                      <Label htmlFor="motorGstPercent">Motor GST Percentage</Label>
+                      <Input
+                        id="motorGstPercent"
+                        type="number"
+                        step="0.01"
+                        value={currentInvoice?.motorGstPercentage || 18}
+                        onChange={(e) => updateInvoice({ motorGstPercentage: parseFloat(e.target.value) || 18 })}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -421,7 +443,7 @@ const InvoiceForm = () => {
         </CardContent>
       </Card>
 
-      {/* Save Button moved to bottom */}
+      {/* Save Button */}
       <div className="flex justify-center">
         <Button onClick={handleSaveInvoice} className="bg-green-600 hover:bg-green-700 px-8">
           Save Invoice
