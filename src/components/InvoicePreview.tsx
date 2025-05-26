@@ -14,7 +14,15 @@ const InvoicePreview = () => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
-  if (!currentInvoice) return null;
+  if (!currentInvoice) {
+    return (
+      <Card className="p-6 bg-white">
+        <div className="text-center text-gray-500">
+          <p>No invoice data available. Please create a new invoice.</p>
+        </div>
+      </Card>
+    );
+  }
 
   const selectedVendor = vendors.find(v => v.id === currentInvoice.vendorId);
   const selectedParty = parties.find(p => p.id === currentInvoice.partyId);
@@ -105,20 +113,20 @@ const InvoicePreview = () => {
                 <h3 className="font-bold text-blue-800">BUYER'S DETAILS</h3>
               </div>
               <div className="p-2 space-y-1">
-                <p className="font-semibold">{selectedParty?.name || 'MAX WALLPAPER & INTERIOR'}</p>
+                <p className="font-semibold">{selectedParty?.name || 'Party Name'}</p>
                 <p>S. No.: 1430</p>
-                <p>GST No.: {currentInvoice.gstNo}</p>
-                <p>Email id.: {selectedParty?.email}</p>
-                <p>Contact Person.: {selectedParty?.contactPerson}</p>
+                <p>GST No.: {currentInvoice.gstNo || 'N/A'}</p>
+                <p>Email id.: {selectedParty?.email || 'N/A'}</p>
+                <p>Contact Person.: {selectedParty?.contactPerson || 'N/A'}</p>
               </div>
             </div>
             <div className="space-y-2">
               <div className="grid grid-cols-2 gap-2">
                 <div className="border border-black p-2">
-                  <span className="font-semibold">GST No.:</span>
+                  <span className="font-semibold">Invoice No.:</span>
                 </div>
                 <div className="border border-black p-2">
-                  {currentInvoice.gstNo || companySettings.gstNo || '07AFFPJ4441N1Z9'}
+                  {currentInvoice.invoiceNumber || 'N/A'}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -126,26 +134,24 @@ const InvoicePreview = () => {
                   <span className="font-semibold">Date:</span>
                 </div>
                 <div className="border border-black p-2">
-                  {new Date(currentInvoice.date).toLocaleDateString('en-GB')}
+                  {currentInvoice.date ? new Date(currentInvoice.date).toLocaleDateString('en-GB') : 'N/A'}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="border border-black p-2">
-                  <span className="font-semibold">Dispatch via:</span>
+                  <span className="font-semibold">Vendor:</span>
                 </div>
-                <div className="border border-black p-2"></div>
+                <div className="border border-black p-2">
+                  {selectedVendor?.name || 'N/A'}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="border border-black p-2">
-                  <span className="font-semibold">Dispatch From:</span>
+                  <span className="font-semibold">GST No.:</span>
                 </div>
-                <div className="border border-black p-2"></div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
                 <div className="border border-black p-2">
-                  <span className="font-semibold">Other Reference:</span>
+                  {currentInvoice.gstNo || companySettings.gstNo || '07AFFPJ4441N1Z9'}
                 </div>
-                <div className="border border-black p-2"></div>
               </div>
             </div>
           </div>
@@ -156,7 +162,7 @@ const InvoicePreview = () => {
             <p className="text-sm">कृपया चौड़ाई (width) और ऊंचाई (height) को सही से जांचे</p>
           </div>
 
-          {/* Items Table - Enhanced for A4 printing */}
+          {/* Items Table */}
           <div className="border border-black mb-4 overflow-x-auto">
             <table className="invoice-table w-full text-xs">
               <thead>
@@ -175,61 +181,56 @@ const InvoicePreview = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentInvoice.items.map((item, index) => (
-                  <tr key={item.id}>
-                    <td className="border border-black p-1 text-center">{index + 1}</td>
-                    <td className="border border-black p-1">{item.productName}</td>
-                    <td className="border border-black p-1">{item.shade}</td>
-                    <td className="border border-black p-1">{item.shadeColor}</td>
-                    <td className="border border-black p-1">{item.operationType}</td>
-                    <td className="border border-black p-1 text-center">{item.quantity}</td>
-                    <td className="border border-black p-1 text-center">
-                      {item.unit === 'inches' 
-                        ? `${item.widthInches} x ${item.heightInches}` 
-                        : `${item.widthCm} x ${item.heightCm}`
-                      }
-                    </td>
-                    <td className="border border-black p-1 text-center">{item.sqFt}</td>
-                    <td className="border border-black p-1 text-center">{item.pricePerSqFt}</td>
-                    <td className="border border-black p-1 text-center">{item.amount.toFixed(2)}</td>
-                    <td className="border border-black p-1 text-center print:hidden">
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => removeInvoiceItem(item.id)}
-                        className="text-xs h-6"
-                      >
-                        Remove
-                      </Button>
+                {currentInvoice.items && currentInvoice.items.length > 0 ? (
+                  currentInvoice.items.map((item, index) => (
+                    <tr key={item.id}>
+                      <td className="border border-black p-1 text-center">{index + 1}</td>
+                      <td className="border border-black p-1">{item.productName}</td>
+                      <td className="border border-black p-1">{item.shade}</td>
+                      <td className="border border-black p-1">{item.shadeColor}</td>
+                      <td className="border border-black p-1">{item.operationType}</td>
+                      <td className="border border-black p-1 text-center">{item.quantity}</td>
+                      <td className="border border-black p-1 text-center">
+                        {item.unit === 'inches' 
+                          ? `${item.widthInches} x ${item.heightInches}` 
+                          : `${item.widthCm} x ${item.heightCm}`
+                        }
+                      </td>
+                      <td className="border border-black p-1 text-center">{item.sqFt || 0}</td>
+                      <td className="border border-black p-1 text-center">{item.pricePerSqFt || 0}</td>
+                      <td className="border border-black p-1 text-center">{(item.amount || 0).toFixed(2)}</td>
+                      <td className="border border-black p-1 text-center print:hidden">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => removeInvoiceItem(item.id)}
+                          className="text-xs h-6"
+                        >
+                          Remove
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td className="border border-black p-1 text-center" colSpan={11}>
+                      No items added to invoice
                     </td>
                   </tr>
-                ))}
-                {/* Empty rows */}
-                {Array.from({ length: Math.max(0, 4 - currentInvoice.items.length) }).map((_, index) => (
-                  <tr key={`empty-${index}`}>
-                    <td className="border border-black p-1 h-8"></td>
-                    <td className="border border-black p-1"></td>
-                    <td className="border border-black p-1"></td>
-                    <td className="border border-black p-1"></td>
-                    <td className="border border-black p-1"></td>
-                    <td className="border border-black p-1"></td>
-                    <td className="border border-black p-1"></td>
-                    <td className="border border-black p-1"></td>
+                )}
+                
+                {/* Total Material Row */}
+                {currentInvoice.items && currentInvoice.items.length > 0 && (
+                  <tr className="bg-blue-100">
+                    <td className="border border-black p-1" colSpan={5}></td>
+                    <td className="border border-black p-1 text-center font-semibold">TOTAL MATERIAL -</td>
+                    <td className="border border-black p-1 text-center font-semibold">{currentInvoice.totalMaterial || 0}</td>
+                    <td className="border border-black p-1 text-center font-semibold">{currentInvoice.totalSqFt || 0}</td>
                     <td className="border border-black p-1"></td>
                     <td className="border border-black p-1"></td>
                     <td className="border border-black p-1 print:hidden"></td>
                   </tr>
-                ))}
-                {/* Total Material Row */}
-                <tr className="bg-blue-100">
-                  <td className="border border-black p-1" colSpan={5}></td>
-                  <td className="border border-black p-1 text-center font-semibold">TOTAL MATERIAL -</td>
-                  <td className="border border-black p-1 text-center font-semibold">{currentInvoice.totalMaterial}</td>
-                  <td className="border border-black p-1 text-center font-semibold">{currentInvoice.totalSqFt}</td>
-                  <td className="border border-black p-1"></td>
-                  <td className="border border-black p-1"></td>
-                  <td className="border border-black p-1 print:hidden"></td>
-                </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -396,7 +397,7 @@ const InvoicePreview = () => {
         
         <div className="mt-6 flex justify-center gap-2 print:hidden">
           <Button onClick={() => setIsPreviewOpen(true)} variant="outline">
-            Preview
+            Full Preview
           </Button>
           <Button onClick={handlePrint} variant="outline">
             Print Invoice

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useInvoice } from '../contexts/InvoiceContext';
 import { useMasterData } from '../contexts/MasterDataContext';
@@ -32,6 +33,7 @@ const InvoiceForm = () => {
   });
 
   const [motorGstEnabled, setMotorGstEnabled] = useState(false);
+  const [motorGstPercentage, setMotorGstPercentage] = useState(18);
 
   useEffect(() => {
     calculateTotals();
@@ -121,6 +123,8 @@ const InvoiceForm = () => {
 
   const handleNewInvoice = () => {
     createNewInvoice();
+    setMotorGstEnabled(false);
+    setMotorGstPercentage(18);
     toast({
       title: "Success",
       description: "New invoice created"
@@ -379,16 +383,19 @@ const InvoiceForm = () => {
           </div>
 
           {currentInvoice?.gstEnabled && (
-            <div>
-              <Label htmlFor="gstPercent">GST Percentage</Label>
-              <Input
-                id="gstPercent"
-                type="number"
-                step="0.01"
-                value={currentInvoice?.gstPercentage || 18}
-                onChange={(e) => updateInvoice({ gstPercentage: parseFloat(e.target.value) || 18 })}
-              />
-              <div className="flex items-center space-x-2 mt-2">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="gstPercent">GST Percentage</Label>
+                <Input
+                  id="gstPercent"
+                  type="number"
+                  step="0.01"
+                  value={currentInvoice?.gstPercentage || 18}
+                  onChange={(e) => updateInvoice({ gstPercentage: parseFloat(e.target.value) || 18 })}
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2">
                 <Checkbox
                   id="motorGst"
                   checked={motorGstEnabled}
@@ -396,6 +403,19 @@ const InvoiceForm = () => {
                 />
                 <Label htmlFor="motorGst" className="text-sm">Apply GST on Motor</Label>
               </div>
+
+              {motorGstEnabled && (
+                <div>
+                  <Label htmlFor="motorGstPercent">Motor GST Percentage</Label>
+                  <Input
+                    id="motorGstPercent"
+                    type="number"
+                    step="0.01"
+                    value={motorGstPercentage}
+                    onChange={(e) => setMotorGstPercentage(parseFloat(e.target.value) || 18)}
+                  />
+                </div>
+              )}
             </div>
           )}
         </CardContent>
